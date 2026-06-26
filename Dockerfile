@@ -15,7 +15,6 @@ RUN git clone https://github.com/goodguy1963/ComfyUI-ThinkingLLM.git /comfyui/cu
 RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/sume180635/qwen3-4b-fp8-scaled/resolve/main/qwen3_4b_fp8_scaled.safetensors' --relative-path models/text_encoders --filename 'qwen3_4b_fp8_scaled.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
 RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors' --relative-path models/vae --filename 'flux2-vae.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
 RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/YuCollection/FLUX.2-klein-4B-bf16/resolve/main/flux-2-klein-4b.safetensors' --relative-path models/diffusion_models --filename 'flux-2-klein-4b-bf16.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
-RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/Comfy-Org/gemma-4/resolve/main/text_encoders/gemma4_e4b_it_fp8_scaled.safetensors' --relative-path models/text_encoders --filename 'gemma4_e4b_it_fp8_scaled.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
 
 # copy all input data (like images or videos) into comfyui (uncomment and adjust if needed)
 # COPY input/ /comfyui/input/
@@ -30,6 +29,18 @@ RUN wget --progress=dot:giga -O '/comfyui/input/pexels-mimfathi-10919291.jpg' "h
 # =====================================================================
 # ADDED FOR LOG VERBOSITY AND DYNAMIC ENTRYPOINT ROUTING
 # =====================================================================
+RUN pip install --no-cache-dir huggingface_hub
+
+# We use an inline bash command to correctly map the build ARG HF_TOKEN into the Python runtime environment
+RUN export HF_TOKEN=$HF_TOKEN && python3 -c " \
+import os; \
+from huggingface_hub import snapshot_download; \
+snapshot_download( \
+    repo_id='google/gemma-4-E4B-it', \
+    local_dir='/comfyui/models/LLM/gemma-4-E4B-it', \
+    ignore_patterns=['*.md', '*.txt', '*.pdf', '*fp16*'], \
+    token=os.environ.get('HF_TOKEN') \
+)"
 
 # 1. Force Python to dump console output instantly instead of caching/buffering it
 ENV PYTHONUNBUFFERED=1
