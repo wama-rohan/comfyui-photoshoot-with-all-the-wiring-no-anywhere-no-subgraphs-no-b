@@ -26,21 +26,6 @@ RUN wget --progress=dot:giga -O '/comfyui/input/pexels-mimfathi-10919291.jpg' "h
 # =====================================================================
 # ADDED FOR LOG VERBOSITY AND PRE-BAKED LLM DOWNLOADS
 # =====================================================================
-RUN pip install --no-cache-dir huggingface_hub
-
-# Safe block execution ensuring code lines stay clear of multiline whitespace quirks
-RUN export HF_TOKEN=$HF_TOKEN && python3 -c " \
-import os, sys; \
-from huggingface_hub import snapshot_download; \
-try: \
-    print('Starting Gemma download using token length:', len(os.environ.get('HF_TOKEN', ''))); \
-    snapshot_download(repo_id='google/gemma-4-E4B-it', local_dir='/comfyui/models/LLM/gemma-4-E4B-it', ignore_patterns=['*.md', '*.txt', '*.pdf', '*fp16*'], token=os.environ.get('HF_TOKEN')); \
-    print('Download complete successfully!'); \
-except Exception as e: \
-    print('!!! DOWNLOAD FAILED !!!', file=sys.stderr); \
-    print(str(e), file=sys.stderr); \
-    sys.exit(1); \
-"
 
 # 1. Force Python to dump console output instantly instead of caching/buffering it
 ENV PYTHONUNBUFFERED=1
