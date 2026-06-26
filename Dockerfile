@@ -29,12 +29,18 @@ RUN pip install --no-cache-dir --upgrade transformers accelerate
 # =====================================================================
 # DOWNLOAD VIA HUGGING FACE BUCKET (PUBLIC) TO Qwen-VL PATH
 # =====================================================================
+# =====================================================================
+# DOWNLOAD VIA HUGGING FACE BUCKET (PUBLIC) TO Qwen-VL PATH
+# =====================================================================
 # 1. Install the Hugging Face CLI tool inside the image layer
 RUN curl -LsSf https://hf.co/cli/install.sh | bash
 
-# 2. Setup destination and sync the bucket contents into the exact folder structure
+# 2. Add both common fallback execution bins directly to the system environment path
+ENV PATH="/root/.local/bin:/usr/local/bin:${PATH}"
+
+# 3. Setup destination and sync the bucket contents using the discovered 'hf' binary path
 RUN mkdir -p /comfyui/models/LLM/Qwen-VL/gemma-4-E4B-it && \
-    /root/.local/bin/hf sync hf://buckets/wamarohan/gemma-4-E4B-it-bucket /comfyui/models/LLM/Qwen-VL/gemma-4-E4B-it
+    hf sync hf://buckets/wamarohan/gemma-4-E4B-it-bucket /comfyui/models/LLM/Qwen-VL/gemma-4-E4B-it
 
 # Force Python to dump console output instantly instead of caching/buffering it
 ENV PYTHONUNBUFFERED=1
