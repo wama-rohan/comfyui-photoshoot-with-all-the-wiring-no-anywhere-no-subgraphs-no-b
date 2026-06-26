@@ -23,6 +23,9 @@ RUN wget --progress=dot:giga -O '/comfyui/input/pexels-alina-zahorulko-48514961-
 RUN wget --progress=dot:giga -O '/comfyui/input/Indian_male_model_1.png' "https://cool-anteater-319.convex.cloud/api/storage/318e2752-8dfd-4af7-b349-340e5912dcec"
 RUN wget --progress=dot:giga -O '/comfyui/input/pexels-mimfathi-10919291.jpg' "https://cool-anteater-319.convex.cloud/api/storage/af0e0e80-ccd5-43e0-81d8-cfc07bd8819e"
 
+# Alternative option: Install transformers from source for bleeding-edge architectures
+RUN pip install --no-cache-dir git+https://github.com/huggingface/transformers.git accelerate
+
 # =====================================================================
 # ADDED FOR LOG VERBOSITY AND PRE-BAKED LLM DOWNLOADS
 # =====================================================================
