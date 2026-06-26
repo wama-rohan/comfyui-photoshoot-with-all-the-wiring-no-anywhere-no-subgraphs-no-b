@@ -16,9 +16,6 @@ RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy
 RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors' --relative-path models/vae --filename 'flux2-vae.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
 RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/YuCollection/FLUX.2-klein-4B-bf16/resolve/main/flux-2-klein-4b.safetensors' --relative-path models/diffusion_models --filename 'flux-2-klein-4b-bf16.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
 
-# copy all input data (like images or videos) into comfyui (uncomment and adjust if needed)
-# COPY input/ /comfyui/input/
-
 # user-provided inputs override the auto-generated placeholders above.
 RUN wget --progress=dot:giga -O '/comfyui/input/pexels-peterfazekas-1137340.jpg' "https://cool-anteater-319.convex.cloud/api/storage/df3f1b08-4a37-411c-af6f-94196c9dad29"
 RUN wget --progress=dot:giga -O '/comfyui/input/indian_ethnic_wear_male1.webp' "https://cool-anteater-319.convex.cloud/api/storage/e2569b9d-7f24-4b2c-a776-95c9cc65227f"
@@ -31,23 +28,18 @@ RUN wget --progress=dot:giga -O '/comfyui/input/pexels-mimfathi-10919291.jpg' "h
 # =====================================================================
 RUN pip install --no-cache-dir huggingface_hub
 
-# Every line inside the python quotes must have NO leading spaces
+# Safe block execution ensuring code lines stay clear of multiline whitespace quirks
 RUN export HF_TOKEN=$HF_TOKEN && python3 -c " \
 import os, sys; \
 from huggingface_hub import snapshot_download; \
 try: \
-print('Starting Gemma download using token length:', len(os.environ.get('HF_TOKEN', ''))); \
-snapshot_download( \
-repo_id='google/gemma-4-E4B-it', \
-local_dir='/comfyui/models/LLM/gemma-4-E4B-it', \
-ignore_patterns=['*.md', '*.txt', '*.pdf', '*fp16*'], \
-token=os.environ.get('HF_TOKEN') \
-); \
-print('Download complete successfully!'); \
+    print('Starting Gemma download using token length:', len(os.environ.get('HF_TOKEN', ''))); \
+    snapshot_download(repo_id='google/gemma-4-E4B-it', local_dir='/comfyui/models/LLM/gemma-4-E4B-it', ignore_patterns=['*.md', '*.txt', '*.pdf', '*fp16*'], token=os.environ.get('HF_TOKEN')); \
+    print('Download complete successfully!'); \
 except Exception as e: \
-print('!!! DOWNLOAD FAILED !!!', file=sys.stderr); \
-print(str(e), file=sys.stderr); \
-sys.exit(1); \
+    print('!!! DOWNLOAD FAILED !!!', file=sys.stderr); \
+    print(str(e), file=sys.stderr); \
+    sys.exit(1); \
 "
 
 # 1. Force Python to dump console output instantly instead of caching/buffering it
